@@ -5,7 +5,8 @@ const Users = require('../models/user');
 module.exports.getUsers = (req, res) => {
   Users.find({})
     .then((users) => res.status(200).send(users))
-    .catch((err) => res.status(STATUS_CODE.serverError).send({ message: `Произошла ошибка на сервере: ${err.message}` }));
+    .catch((err) => res.status(STATUS_CODE.serverError)
+      .send({ message: `Произошла ошибка на сервере: ${err.message}` }));
 };
 
 module.exports.createUser = (req, res) => {
@@ -18,7 +19,9 @@ module.exports.createUser = (req, res) => {
           message: 'Переданы некорректные данные при создании пользователя.',
         });
       } else {
-        res.status(STATUS_CODE.serverError).send({ message: `Произошла ошибка на сервере: ${err.message}` });
+        res
+          .status(STATUS_CODE.serverError)
+          .send({ message: `Произошла ошибка на сервере: ${err.message}` });
       }
     });
 };
@@ -32,18 +35,28 @@ module.exports.getUserById = (req, res) => {
     .catch((err) => {
       if (err.name === 'notFound') {
         res.status(STATUS_CODE.notFound).send({ message: err.message });
+      } else if (err.name === 'castError') {
+        res
+          .status(STATUS_CODE.badRequest)
+          .send({ message: 'Пользователь по указанному _id не найден' });
       } else {
-        res.status(STATUS_CODE.serverError).send({ message: `Произошла ошибка на сервере: ${err}` });
+        res
+          .status(STATUS_CODE.serverError)
+          .send({ message: `Произошла ошибка на сервере: ${err}` });
       }
     });
 };
 
 module.exports.updateUser = (req, res) => {
   const { name, about } = req.body;
-  Users.findByIdAndUpdate(req.user._id, { name, about }, {
-    new: true,
-    runValidators: true,
-  })
+  Users.findByIdAndUpdate(
+    req.user._id,
+    { name, about },
+    {
+      new: true,
+      runValidators: true,
+    },
+  )
     .orFail(() => {
       throw new NotFoundError('Пользователь с указанным _id не найден.');
     })
@@ -56,17 +69,23 @@ module.exports.updateUser = (req, res) => {
           message: 'Переданы некорректные данные при создании пользователя.',
         });
       } else {
-        res.status(STATUS_CODE.serverError).send({ message: `Произошла ошибка на сервере: ${err}` });
+        res
+          .status(STATUS_CODE.serverError)
+          .send({ message: `Произошла ошибка на сервере: ${err}` });
       }
     });
 };
 
 module.exports.updateAvatar = (req, res) => {
   const { avatar } = req.body;
-  Users.findByIdAndUpdate(req.user._id, { avatar }, {
-    new: true,
-    runValidators: true,
-  })
+  Users.findByIdAndUpdate(
+    req.user._id,
+    { avatar },
+    {
+      new: true,
+      runValidators: true,
+    },
+  )
     .orFail(() => {
       throw new NotFoundError('Пользователь с указанным _id не найден.');
     })
@@ -79,7 +98,9 @@ module.exports.updateAvatar = (req, res) => {
           message: 'Переданы некорректные данные при создании пользователя.',
         });
       } else {
-        res.status(STATUS_CODE.serverError).send({ message: `Произошла ошибка на сервере: ${err}` });
+        res
+          .status(STATUS_CODE.serverError)
+          .send({ message: `Произошла ошибка на сервере: ${err}` });
       }
     });
 };
