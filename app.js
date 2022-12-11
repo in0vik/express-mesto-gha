@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { routes } = require('./routes');
+const STATUS_CODE = require('./errors/errorCodes');
 
 const app = express();
 
@@ -19,6 +20,9 @@ app.use((req, res, next) => {
 });
 
 app.use(routes);
+app.use('*', (req, res) => {
+  res.status(STATUS_CODE.notFound).send({ message: 'Страница не найдена' });
+});
 
 app.listen(PORT, () => {
   console.log(`App is listening port: ${PORT}`);

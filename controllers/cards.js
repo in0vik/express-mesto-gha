@@ -36,6 +36,10 @@ module.exports.deleteCard = (req, res) => {
     .catch((err) => {
       if (err.name === 'notFound') {
         res.status(STATUS_CODE.notFound).send({ message: err.message });
+      } else if (err.name === 'CastError') {
+        res
+          .status(STATUS_CODE.badRequest)
+          .send({ message: 'Передан не корректный _id карточки' });
       } else {
         res
           .status(STATUS_CODE.serverError)
@@ -79,6 +83,9 @@ module.exports.dislikeCard = (req, res) => {
     { $pull: { likes: req.user._id } },
     { new: true },
   )
+    .orFail(() => {
+      throw new NotFoundError('Передан несуществтвующий _id карточки');
+    })
     .then((response) => res.send(response))
     .catch((err) => {
       if (err.name === 'notFound') {
