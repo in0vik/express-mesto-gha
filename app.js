@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const { isCelebrateError } = require('celebrate');
+const { errors: celebrateErrors, isCelebrateError } = require('celebrate');
 const { routes } = require('./routes');
 const STATUS_CODE = require('./errors/errorCodes');
 const NotFoundError = require('./errors/NotFoundError');
@@ -20,11 +20,11 @@ app.use('*', (req, res, next) => {
   next(new NotFoundError('Страница не найдена'));
 });
 
+app.use(celebrateErrors());
+
 app.use((err, req, res, next) => {
   if (err.statusCode) {
     res.status(err.statusCode).send({ message: err.message });
-  } else if (isCelebrateError(err)) {
-    res.status(STATUS_CODE.badRequest).send({ message: 'Ошибка валидации', ...Object.fromEntries(err.details) });
   } else {
     res.status(STATUS_CODE.serverError).send({ message: 'Произошла ошибка на сервере' });
   }
