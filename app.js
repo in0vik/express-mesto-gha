@@ -1,8 +1,10 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const { isCelebrateError } = require('celebrate');
 const { routes } = require('./routes');
 const STATUS_CODE = require('./errors/errorCodes');
+const NotFoundError = require('./errors/NotFoundError');
 
 const app = express();
 
@@ -12,16 +14,21 @@ app.use(bodyParser.json());
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '639471880a1df3192f0ed715',
-  };
-  next();
+app.use(routes);
+
+app.use('*', (req, res, next) => {
+  next(new NotFoundError('Страница не найдена'));
 });
 
-app.use(routes);
-app.use('*', (req, res) => {
-  res.status(STATUS_CODE.notFound).send({ message: 'Страница не найдена' });
+app.use((err, req, res, next) => {
+  if (err.statusCode) {
+    res.status(err.statusCode).send({ message: err.message });
+  } else if (isCelebrateError(err)) {
+    res.status(STATUS_CODE.badRequest).send({ message: 'Ошибка валидации', ...Object.fromEntries(err.details) });
+  } else {
+    res.status(STATUS_CODE.serverError).send({ message: 'Произошла ошибка на сервере' });
+  }
+  next();
 });
 
 app.listen(PORT, () => {
