@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const { errors: celebrateErrors, isCelebrateError } = require('celebrate');
+const { errors: celebrateErrors } = require('celebrate');
 const { routes } = require('./routes');
 const STATUS_CODE = require('./errors/errorCodes');
 const NotFoundError = require('./errors/NotFoundError');
