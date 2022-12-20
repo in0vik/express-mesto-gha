@@ -28,17 +28,22 @@ module.exports.createUser = (req, res, next) => {
       avatar,
       email,
       password: hash,
-    })
-      .then((user) => res.send(user))
-      .catch((err) => {
-        if (err.name === 'ValidationError') {
-          next(new BadRequestError('Переданы некорректные данные при создании пользователя.'));
-        } else if (err.code === 11000) {
-          next(new Error('такой пользователь уже есть'));
-        } else {
-          next(err);
-        }
-      }));
+    }))
+    .then((user) => res.send({
+      name: user.name,
+      about: user.about,
+      avatar: user.avatar,
+      email: user.email,
+    }))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError('Переданы некорректные данные при создании пользователя.'));
+      } else if (err.code === 11000) {
+        next(new Error('такой пользователь уже есть'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports.getUserById = (req, res, next) => {
