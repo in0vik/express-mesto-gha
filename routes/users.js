@@ -24,7 +24,8 @@ userRoutes.patch('/me', celebrate({
 }), updateUser);
 userRoutes.patch('/me/avatar', celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().min(2).uri(),
+    // eslint-disable-next-line no-useless-escape
+    avatar: Joi.string().min(2).regex(/https?:\/\/(www.)?[\da-z-._~:\/?#[\]@!$&'()*+,;=]*/),
   }),
 }), updateAvatar);
 

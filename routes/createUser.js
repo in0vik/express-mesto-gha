@@ -8,7 +8,8 @@ createUserRoutes.post('/', celebrate({
     password: Joi.string().required(),
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
-    avatar: Joi.string().min(2).uri(),
+    // eslint-disable-next-line no-useless-escape
+    avatar: Joi.string().min(2).regex(/https?:\/\/(www.)?[\da-z-._~:\/?#[\]@!$&'()*+,;=]*/),
   }),
 }), createUser);
 
