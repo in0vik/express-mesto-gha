@@ -1,4 +1,5 @@
 const BadRequestError = require('../errors/BadRequestError');
+const FrobiddenError = require('../errors/ForbiddenError');
 const NotFoundError = require('../errors/NotFoundError');
 const Cards = require('../models/card');
 
@@ -14,7 +15,11 @@ module.exports.createCard = (req, res, next) => {
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new BadRequestError('Переданы некорректные данные при создании карточки.'));
+        next(
+          new BadRequestError(
+            'Переданы некорректные данные при создании карточки.'
+          ),
+        );
       } else {
         next(err);
       }
@@ -23,11 +28,20 @@ module.exports.createCard = (req, res, next) => {
 
 module.exports.deleteCard = (req, res, next) => {
   const { cardId } = req.params;
-  Cards.remove({ _id: cardId })
+  Cards.findById({ _id: cardId })
     .orFail(() => {
       next(new NotFoundError('Карточка по указанному _id не найдена'));
     })
-    .then((response) => res.send(response))
+    .then((card) => {
+      if (cardId === card.owner.toString()) {
+        Cards.remove({ _id: cardId })
+          .then(() => {
+            res.send(card);
+          });
+      } else {
+        next(new FrobiddenError('Нет прав для удаления карточки'));
+      }
+    })
     .catch((err) => {
       if (err.name === 'notFound') {
         next(new NotFoundError(err.message));
@@ -54,7 +68,11 @@ module.exports.likeCard = (req, res, next) => {
       if (err.name === 'notFound') {
         next(new NotFoundError(err.message));
       } else if (err.name === 'ValidationError' || err.name === 'CastError') {
-        next(new BadRequestError('Переданы некорректные данные для постановки лайка.'));
+        next(
+          new BadRequestError(
+            'Переданы некорректные данные для постановки лайка.',
+          ),
+        );
       } else {
         next(err);
       }
@@ -76,7 +94,9 @@ module.exports.dislikeCard = (req, res, next) => {
       if (err.name === 'notFound') {
         next(new NotFoundError(err.message));
       } else if (err.name === 'ValidationError' || err.name === 'CastError') {
-        next(new BadRequestError('Переданы некорректные данные для снятия лайка.'));
+        next(
+          new BadRequestError('Переданы некорректные данные для снятия лайка.'),
+        );
       } else {
         next(err);
       }
