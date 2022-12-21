@@ -1,10 +1,11 @@
 const jwt = require('jsonwebtoken');
-// const ms = require('ms');
+const ms = require('ms');
 const bcrypt = require('bcrypt');
 const NotFoundError = require('../errors/NotFoundError');
 const Users = require('../models/user');
 const BadRequestError = require('../errors/BadRequestError');
 const UnauthorizedError = require('../errors/UnauthorizedError');
+const ConflictError = require('../errors/ConflictError');
 
 module.exports.getUsers = (req, res, next) => {
   Users.find({})
@@ -29,7 +30,7 @@ module.exports.createUser = (req, res, next) => {
       email,
       password: hash,
     }))
-    .then((user) => res.send({
+    .then((user) => res.status(201).send({
       name: user.name,
       about: user.about,
       avatar: user.avatar,
@@ -39,7 +40,7 @@ module.exports.createUser = (req, res, next) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные при создании пользователя.'));
       } else if (err.code === 11000) {
-        next(new Error('такой пользователь уже есть'));
+        next(new ConflictError('Такой пользователь уже есть'));
       } else {
         next(err);
       }
@@ -135,19 +136,19 @@ module.exports.login = (req, res, next) => {
   Users.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        next(new BadRequestError('Непрвильная почта или пароль'));
+        next(new UnauthorizedError('Непрвильная почта или пароль'));
       }
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            next(new BadRequestError('Непрвильная почта или пароль'));
+            next(new UnauthorizedError('Непрвильная почта или пароль'));
           }
           const token = jwt.sign({ _id: user._id }, 'secret-key', { expiresIn: '7d' });
-          // res.cookie('jwt', token, {
-          //   maxAge: ms('7d'),
-          //   httpOnly: true,
-          // });
-          res.send({ token });
+          res.cookie('jwt', token, {
+            maxAge: ms('7d'),
+            httpOnly: true,
+          });
+          res.status(200).send({ token });
         });
     })
     .catch((err) => {
