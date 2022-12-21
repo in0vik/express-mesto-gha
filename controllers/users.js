@@ -54,9 +54,7 @@ module.exports.getUserById = (req, res, next) => {
     })
     .then((user) => res.status(200).send(user))
     .catch((err) => {
-      if (err.name === 'notFound') {
-        next(new NotFoundError(err.message));
-      } else if (err.name === 'CastError') {
+      if (err.name === 'CastError') {
         next(new BadRequestError('Пользователь по указанному _id не найден'));
       } else {
         next(err);
@@ -71,9 +69,7 @@ module.exports.getCurrentUser = (req, res, next) => {
     })
     .then((user) => res.status(200).send(user))
     .catch((err) => {
-      if (err.name === 'notFound') {
-        next(new NotFoundError(err.message));
-      } else if (err.name === 'CastError') {
+      if (err.name === 'CastError') {
         next(new BadRequestError('Пользователь по указанному _id не найден'));
       } else {
         next(err);
@@ -96,9 +92,7 @@ module.exports.updateUser = (req, res, next) => {
     })
     .then((user) => res.send(user))
     .catch((err) => {
-      if (err.name === 'notFound') {
-        next(new NotFoundError(err.message));
-      } else if (err.name === 'ValidationError') {
+      if (err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные при обновлении пользователя.'));
       } else {
         next(err);
@@ -121,9 +115,7 @@ module.exports.updateAvatar = (req, res, next) => {
     })
     .then((user) => res.send(user))
     .catch((err) => {
-      if (err.name === 'notFound') {
-        next(new NotFoundError(err.message));
-      } else if (err.name === 'ValidationError') {
+      if (err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные при обновлении аватара.'));
       } else {
         next(err);
@@ -136,12 +128,12 @@ module.exports.login = (req, res, next) => {
   Users.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        next(new UnauthorizedError('Непрвильная почта или пароль'));
+        return next(new UnauthorizedError('Непрвильная почта или пароль'));
       }
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            next(new UnauthorizedError('Непрвильная почта или пароль'));
+            return next(new UnauthorizedError('Непрвильная почта или пароль'));
           }
           const token = jwt.sign({ _id: user._id }, 'secret-key', { expiresIn: '7d' });
           res.cookie('jwt', token, {
