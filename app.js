@@ -1,4 +1,7 @@
 const express = require('express');
+const helmet = require('helmet');
+const ms = require('ms');
+const rateLimit = require('express-rate-limit');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { errors: celebrateErrors } = require('celebrate');
@@ -10,6 +13,15 @@ const app = express();
 
 const { PORT = 3000 } = process.env;
 
+const limiter = rateLimit({
+  windowMs: ms('15m'),
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use(limiter);
+app.use(helmet());
 app.use(bodyParser.json());
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
