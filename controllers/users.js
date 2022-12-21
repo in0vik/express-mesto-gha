@@ -131,6 +131,7 @@ module.exports.login = (req, res, next) => {
         return next(new UnauthorizedError('Непрвильная почта или пароль'));
       }
       return bcrypt.compare(password, user.password)
+        // eslint-disable-next-line consistent-return
         .then((matched) => {
           if (!matched) {
             return next(new UnauthorizedError('Непрвильная почта или пароль'));
