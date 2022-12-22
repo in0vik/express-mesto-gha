@@ -9,7 +9,7 @@ const ConflictError = require('../errors/ConflictError');
 
 module.exports.getUsers = (req, res, next) => {
   Users.find({})
-    .then((users) => res.status(200).send(users))
+    .then((users) => res.send(users))
     .catch(next);
 };
 
@@ -52,7 +52,7 @@ module.exports.getUserById = (req, res, next) => {
     .orFail(() => {
       next(new NotFoundError('Пользователь по указанному _id не найден'));
     })
-    .then((user) => res.status(200).send(user))
+    .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new BadRequestError('Пользователь по указанному _id не найден'));
@@ -67,7 +67,7 @@ module.exports.getCurrentUser = (req, res, next) => {
     .orFail(() => {
       next(new NotFoundError('Пользователь по указанному _id не найден'));
     })
-    .then((user) => res.status(200).send(user))
+    .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new BadRequestError('Пользователь по указанному _id не найден'));
@@ -141,10 +141,15 @@ module.exports.login = (req, res, next) => {
             maxAge: ms('7d'),
             httpOnly: true,
           });
-          res.status(200).send({ token });
+          res.send({ token });
         });
     })
     .catch((err) => {
       next(new UnauthorizedError(err.message));
     });
+};
+
+module.exports.logOut = (req, res, next) => {
+  res.clearCookie('jwt').send({ message: 'Выход' })
+    .catch(next);
 };

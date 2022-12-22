@@ -1,5 +1,6 @@
 const cardRoutes = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
+const { regex } = require('../config/constants');
 
 const {
   getCards,
@@ -18,8 +19,7 @@ cardRoutes.delete('/:cardId', celebrate({
 cardRoutes.post('/', celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30).required(),
-    // eslint-disable-next-line no-useless-escape
-    link: Joi.string().min(2).required().regex(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/),
+    link: Joi.string().min(2).required().regex(regex.link),
   }),
 }), createCard);
 cardRoutes.put('/:cardId/likes', celebrate({

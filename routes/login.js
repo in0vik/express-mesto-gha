@@ -1,6 +1,6 @@
 const { celebrate, Joi } = require('celebrate');
 const loginRoutes = require('express').Router();
-const { login } = require('../controllers/users');
+const { login, logOut } = require('../controllers/users');
 
 loginRoutes.post('/', celebrate({
   body: Joi.object().keys({
@@ -8,5 +8,7 @@ loginRoutes.post('/', celebrate({
     password: Joi.string().required(),
   }),
 }), login);
+
+loginRoutes.get('/', logOut);
 
 exports.loginRoutes = loginRoutes;

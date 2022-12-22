@@ -8,6 +8,7 @@ const auth = require('../middlewares/auth');
 const routes = express.Router();
 
 routes.use('/signin', loginRoutes);
+routes.use('/signout', loginRoutes);
 routes.use('/signup', createUserRoutes);
 
 routes.use('/users', auth, userRoutes);
